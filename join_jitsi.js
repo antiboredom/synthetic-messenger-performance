@@ -66,7 +66,7 @@ async function main(room, baseUrl = "https://meet.jit.si") {
   await page.evaluate(`APP.conference.muteAudio(true);`);
 
   // Set some friendly display name
-  await page.evaluate(`APP.conference.changeLocalDisplayName('Webcam');`);
+  await page.evaluate(`APP.conference.changeLocalDisplayName('Synthetic Messenger');`);
 
   console.log("Running...");
 }

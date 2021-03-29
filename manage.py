@@ -78,6 +78,13 @@ def destroy_servers():
         d.destroy()
 
 
+@click.command(name="ips", help="Print server ip addresses")
+def print_servers():
+    droplets = get_servers()
+    for d in droplets:
+        print(d.ip_address)
+
+
 @click.command(name="send", help="Send a command to all servers")
 @click.argument("cmd", required=True)
 @click.option(
@@ -124,6 +131,7 @@ def bootup(total=PERFORMERS):
 
 cli.add_command(bootup)
 cli.add_command(send)
+cli.add_command(print_servers)
 cli.add_command(destroy_servers)
 
 if __name__ == "__main__":
