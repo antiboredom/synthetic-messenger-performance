@@ -1,0 +1,13 @@
+#!/bin/bash
+
+DISPLAY=:1 zoom --url="zoommtg://zoom.us/join?action=join&confno=$1" &
+
+sleep 10
+
+DISPLAY=:1 xdotool search --name "Zoom Meeting" key alt+v
+
+sleep 5
+
+DISPLAY=:1 xdotool search --name "Zoom Meeting" windowminimize
+
+

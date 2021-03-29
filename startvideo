@@ -1,0 +1,1 @@
+ffmpeg -f x11grab -s 1280x720 -i :1.0+0,0 -pix_fmt yuv420p -threads 0 -f v4l2 /dev/video1
