@@ -2,8 +2,8 @@
 const puppeteer = require("puppeteer");
 const fs = require("fs");
 
-const width = 1400;
-const height = 1000;
+const width = 1280;
+const height = 720;
 
 let selectors = fs
   .readFileSync("ad_selectors.txt")
