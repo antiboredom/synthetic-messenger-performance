@@ -1,102 +1,91 @@
 """
-Managers the server farm
-Make sure to run export:
+Manage Synthetic Messenger
 
-export DIGITALOCEAN_ACCESS_TOKEN="TOKEN"
+Make sure to:
 
-and
-
+export HCLOUD_TOKEN="TOKEN"
 export SYN_USER="USER"
 
 before running this script
+
+Usage:
+  manage.py bootup <total>
+  manage.py deploy
+  manage.py destroy
+  manage.py ips
+  manage.py send <cmd>
+  manage.py -h | --help
+
+Options:
+  -h --help     Show this screen.
 """
 
+from docopt import docopt
 import os
 import time
-import digitalocean
+from hcloud import Client
+from hcloud.images.domain import Image
+from hcloud.server_types.domain import ServerType
 from pssh.clients import ParallelSSHClient, SSHClient
-import click
 
 
 NAME = "synthetic-bot"
-SIZE = "s-2vcpu-4gb"
-REGION = "nyc1"
+SIZE = "cx21"  # cpx31
 PERFORMERS = 5
 USER = os.getenv("SYN_USER")
-
-
-@click.group()
-def cli():
-    pass
+TOKEN = os.getenv("HCLOUD_TOKEN")
 
 
 def get_servers():
-    manager = digitalocean.Manager()
-    droplets = manager.get_all_droplets()
-    droplets = [d for d in droplets if NAME in d.name]
-    return droplets
+    client = Client(token=TOKEN)
+    servers = client.servers.get_all()
+    servers = [s for s in servers if NAME in s.name]
+    return servers
 
 
-def create_servers(image, size=SIZE, region=REGION, total=PERFORMERS):
-    manager = digitalocean.Manager()
-    keys = manager.get_all_sshkeys()
+def create_servers(size=SIZE, total=PERFORMERS):
+    client = Client(token=TOKEN)
+    key = get_key()
+    image = get_image()
+    st = ServerType(SIZE)
 
     for i in range(total):
         name = f"{NAME}-{i}"
-        droplet = digitalocean.Droplet(
-            name=name,
-            region=region,
-            image=image.id,
-            size_slug=size,
-            ssh_keys=keys,
-            backups=False,
+        response = client.servers.create(
+            name=name, server_type=st, image=image, ssh_keys=[key]
         )
-        droplet.create()
+        print(response)
 
 
 def get_image():
     """ Gets the most recent synthetic messenger image"""
-    manager = digitalocean.Manager()
-    images = manager.get_images(private=True)
-    images = [i for i in images if "synthetic" in i.name]
-    images = sorted(images, key=lambda k: k.created_at, reverse=True)
-    image = images[0]
-    return image
+    client = Client(token=TOKEN)
+    images = client.images.get_all()
+    images = [i for i in images if "synthetic" in i.description]
+    return images[-1]
 
 
-def get_sizes():
-    manager = digitalocean.Manager()
-    sizes = manager.get_all_sizes()
-    for s in sizes:
-        print(s.slug)
+def get_key():
+    """ Gets the most recent synthetic messenger image"""
+    client = Client(token=TOKEN)
+    keys = client.ssh_keys.get_list()
+    return keys[0][0]
 
 
-@click.command(name="destroy", help="Destroy all servers")
 def destroy_servers():
-    droplets = get_servers()
-    for d in droplets:
-        d.destroy()
+    servers = get_servers()
+    for s in servers:
+        s.delete()
 
 
-@click.command(name="ips", help="Print server ip addresses")
-def print_servers():
-    droplets = get_servers()
-    for d in droplets:
-        print(d.ip_address)
+def get_ips():
+    servers = get_servers()
+    ips = [s.public_net.ipv4.ip for s in servers]
+    return ips
 
 
-@click.command(name="send", help="Send a command to all servers")
-@click.argument("cmd", required=True)
-@click.option(
-    "--pause",
-    "-p",
-    default=0,
-    type=int,
-    help="Pause in seconds between sending to each server",
-)
-def send(cmd, user=USER, pause=0):
-    droplets = get_servers()
-    hosts = [d.ip_address for d in droplets]
+def send(cmd, pause=0, user=USER):
+    hosts = get_ips()
 
     if pause == 0:
         client = ParallelSSHClient(hosts, user=user)
@@ -115,27 +104,37 @@ def send(cmd, user=USER, pause=0):
             time.sleep(pause)
 
 
-@click.command(name="bootup", help="Boot up servers")
-@click.option(
-    "--total",
-    "-t",
-    type=int,
-    required=True,
-    default=PERFORMERS,
-    help="Total servers to boot up",
-)
 def bootup(total=PERFORMERS):
-    image = get_image()
-    create_servers(image, total=total)
+    create_servers(total=total)
 
 
-cli.add_command(bootup)
-cli.add_command(send)
-cli.add_command(print_servers)
-cli.add_command(destroy_servers)
+def deploy():
+    send("cd bot;git pull")
+
 
 if __name__ == "__main__":
-    cli()
+    args = docopt(__doc__)
+
+    if args["bootup"]:
+        total = int(args["<total>"])
+        bootup(total=total)
+
+    if args["deploy"]:
+        deploy()
+
+    if args["destroy"]:
+        destroy_servers()
+
+    if args["ips"]:
+        for ip in get_ips():
+            print(ip)
+
+    if args["send"]:
+        cmd = args["<cmd>"]
+        send(cmd)
+
+
+    # get_keys()
     # bootup()
     # start()
     # send("cd bot; ./joinzoom 94682594244", pause=20)
