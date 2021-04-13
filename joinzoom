@@ -1,5 +1,9 @@
 #!/bin/bash
 
+DISPLAY=:1 xdotool search --name "VNC config" windowminimize
+
+sleep 1
+
 DISPLAY=:1 zoom --url="zoommtg://zoom.us/join?action=join&confno=${1:-93843540015}" &
 
 sleep 10
