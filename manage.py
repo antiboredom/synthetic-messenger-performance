@@ -13,6 +13,7 @@ Usage:
   manage.py deploy
   manage.py destroy
   manage.py ips
+  manage.py vnc
   manage.py send <cmd>
   manage.py -h | --help
 
@@ -27,6 +28,7 @@ from hcloud import Client
 from hcloud.images.domain import Image
 from hcloud.server_types.domain import ServerType
 from pssh.clients import ParallelSSHClient, SSHClient
+from subprocess import call
 
 
 NAME = "synthetic-bot"
@@ -120,6 +122,12 @@ def deploy():
     send("cd bot;git pull")
 
 
+def vnc(ip=None):
+    if ip is None:
+        ip = get_ips()[0]
+    call(["ssh", "-L", "5901:localhost:5901", f"{USER}@{ip}"])
+
+
 if __name__ == "__main__":
     args = docopt(__doc__)
 
@@ -136,6 +144,9 @@ if __name__ == "__main__":
     if args["ips"]:
         for ip in get_ips():
             print(ip)
+
+    if args["vnc"]:
+        vnc()
 
     if args["send"]:
         cmd = args["<cmd>"]
