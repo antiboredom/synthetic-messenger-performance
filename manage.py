@@ -18,7 +18,13 @@ Usage:
   manage.py -h | --help
 
 Options:
-  -h --help     Show this screen.
+  bootup <total>    Boot up servers
+  deploy            Pull newest changes to all servers
+  destroy           Destroy all servers
+  ips               List all ips
+  vnc               VNC into the first server
+  send <cmd>        Send a command to all servers
+  -h --help         Show this screen.
 """
 
 from docopt import docopt
