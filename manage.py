@@ -44,7 +44,7 @@ def get_servers():
 
 
 def create_servers(size=SIZE, total=PERFORMERS):
-    '''create some servers'''
+    """create some servers"""
 
     # get the last server number
     servers = get_servers()
@@ -57,7 +57,7 @@ def create_servers(size=SIZE, total=PERFORMERS):
     image = get_image()
     st = ServerType(SIZE)
 
-    for i in range(start, start+total):
+    for i in range(start, start + total):
         name = f"{NAME}-{i}"
         response = client.servers.create(
             name=name, server_type=st, image=image, ssh_keys=[key]
@@ -140,7 +140,6 @@ if __name__ == "__main__":
     if args["send"]:
         cmd = args["<cmd>"]
         send(cmd)
-
 
     # get_keys()
     # bootup()
