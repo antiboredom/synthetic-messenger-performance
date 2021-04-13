@@ -29,7 +29,7 @@ systemctl restart ssh
 
 # install the stuff
 apt update
-apt -y install openbox obconf ffmpeg tigervnc-standalone-server tigervnc-common xdg-utils wmctrl xterm git libnss3 xdotool
+apt -y install openbox obconf ffmpeg tigervnc-standalone-server tigervnc-common xdg-utils wmctrl xterm git libnss3 xdotool x11-xserver-utils feh
 apt -y install linux-headers-$(uname -r)
 apt -y install linux-modules-extra-$(uname -r)
 apt -y install dkms
