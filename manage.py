@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 """
 Manage Synthetic Messenger
 
@@ -18,7 +20,7 @@ Usage:
   manage.py -h | --help
 
 Options:
-  bootup <total>    Boot up servers
+  bootup <total>    Boot up <total> number of servers
   deploy            Pull newest changes to all servers
   destroy           Destroy all servers
   ips               List all ips
