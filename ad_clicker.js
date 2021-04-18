@@ -1,9 +1,24 @@
 // const Database = require("sqlite-async");
 const puppeteer = require("puppeteer");
 const fs = require("fs");
+const hostname = require("os").hostname();
 
 const width = 1280;
 const height = 720;
+const totalAgents = 1;
+
+let assetNumber;
+
+try {
+  let hostNumber = parseInt(hostname.replace(/\D/g, ""));
+  if (isNaN(hostNumber)) hostNumber = 0;
+  assetNumber = hostNumber % totalAgents;
+} catch(e) {
+  assetNumber = 0;
+}
+
+const assetBase = `https://syntheticmessenger.s3.us-east-1.amazonaws.com/${assetNumber}/`;
+console.log(assetBase);
 
 let selectors = fs
   .readFileSync("ad_selectors.txt")
@@ -58,6 +73,7 @@ async function clickAds(page, url) {
         // });
         // await sleep(1500);
         await el.evaluate((e) => {
+          window.THESCROLLINGSOUND.play();
           e.scrollIntoView({ behavior: "smooth", block: "center" });
           let box = document.querySelector("#sams-hand");
           let bbox = e.getBoundingClientRect();
@@ -72,6 +88,7 @@ async function clickAds(page, url) {
           }, 1000);
         });
         await sleep(1000);
+        await page.evaluate(() => window.THECLICKINGSOUND.play());
         await el.click({ button: "middle" });
         await sleep(500);
       }
@@ -86,8 +103,8 @@ async function clickAds(page, url) {
   return true;
 }
 
-async function installMouseHelper(page) {
-  await page.evaluateOnNewDocument(() => {
+async function installBotHelper(page) {
+  await page.evaluateOnNewDocument((assetBase) => {
     if (window !== window.parent) return;
     window.addEventListener(
       "DOMContentLoaded",
@@ -95,7 +112,7 @@ async function installMouseHelper(page) {
         const box = document.createElement("video");
 
         box.id = "sams-hand";
-        box.src = "https://saaaam.s3.us-east-1.amazonaws.com/hand.webm";
+        box.src = assetBase + "hand.webm";
         box.setAttribute("autoplay", "");
         box.setAttribute("muted", "");
         box.setAttribute("loop", "");
@@ -117,10 +134,20 @@ async function installMouseHelper(page) {
       `;
         document.head.appendChild(styleElement);
         document.body.appendChild(box);
+
+        const click = document.createElement("audio");
+        click.id = "synthetic-click-sample";
+        click.src = assetBase + "click.ogg";
+        window.THECLICKINGSOUND = click;
+
+        const scroll = document.createElement("audio");
+        scroll.id = "synthetic-scroll-sample";
+        scroll.src = assetBase + "scroll.ogg";
+        window.THESCROLLINGSOUND = scroll;
       },
       false
     );
-  });
+  }, assetBase);
 }
 
 async function main(urls) {
@@ -140,7 +167,7 @@ async function main(urls) {
       height: height,
       deviceScaleFactor: 2,
     });
-    await installMouseHelper(page); // Install Mouse Helper
+    await installBotHelper(page); // Install Mouse Helper
     page.setDefaultNavigationTimeout(15000);
     await clickAds(page, url);
     await browser.close();
