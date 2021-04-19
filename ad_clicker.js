@@ -1,7 +1,8 @@
-// const Database = require("sqlite-async");
 const puppeteer = require("puppeteer");
 const fs = require("fs");
 const hostname = require("os").hostname();
+const bent = require("bent");
+const getJSON = bent("json");
 
 const width = 1280;
 const height = 720;
@@ -13,7 +14,7 @@ try {
   let hostNumber = parseInt(hostname.replace(/\D/g, ""));
   if (isNaN(hostNumber)) hostNumber = 0;
   assetNumber = hostNumber % totalAgents;
-} catch(e) {
+} catch (e) {
   assetNumber = 0;
 }
 
@@ -45,6 +46,16 @@ async function getBBox(el) {
     const { x, y, width, height } = e.getBoundingClientRect();
     return { x: x + window.scrollX, y: y + window.scrollY, width, height };
   });
+}
+
+async function getRecentArticles() {
+  try {
+    let results = await getJSON("http://157.245.247.231/?hostname=" + hostname);
+    return results;
+  } catch (e) {
+    console.log(e);
+    return [];
+  }
 }
 
 async function clickAds(page, url) {
@@ -151,6 +162,12 @@ async function installBotHelper(page) {
 }
 
 async function main(urls) {
+  let runForever = false;
+  if (urls.length == 0) {
+    urls = await getRecentArticles();
+    runForever = true;
+  }
+
   const launchOptions = { headless: false };
 
   launchOptions.args = [
@@ -172,11 +189,15 @@ async function main(urls) {
     await clickAds(page, url);
     await browser.close();
   }
+
+  if (runForever) {
+    main([])
+  }
 }
 
 try {
-  const args = process.argv.slice(2);
-  main(args);
+  let urls = process.argv.slice(2);
+  main(urls);
 } catch (e) {
   console.log(e);
 }
