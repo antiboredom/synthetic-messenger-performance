@@ -4,7 +4,8 @@
   "description": "",
   "main": "ad_clicker.js",
   "dependencies": {
-    "puppeteer": "^8.0.0"
+    "puppeteer": "^8.0.0",
+    "sqlite-async": "^1.1.1"
   },
   "devDependencies": {},
   "scripts": {
