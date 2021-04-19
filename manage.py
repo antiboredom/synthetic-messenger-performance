@@ -127,7 +127,7 @@ def bootup(total=PERFORMERS):
 
 
 def deploy():
-    send("cd bot;git pull")
+    send("cd bot;git pull;npm install")
 
 
 def vnc(ip=None):
