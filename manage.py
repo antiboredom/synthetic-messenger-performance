@@ -15,9 +15,11 @@ Usage:
   manage.py deploy
   manage.py destroy
   manage.py ips
+  manage.py send <cmd>
+  manage.py start
+  manage.py stop
   manage.py status
   manage.py vnc
-  manage.py send <cmd>
   manage.py -h | --help
 
 Options:
@@ -25,9 +27,11 @@ Options:
   deploy            Pull newest changes to all servers
   destroy           Destroy all servers
   ips               List all ips
+  send <cmd>        Send a command to all servers
+  start             Start the zooms and the clicking
+  stop              Stop zooming and clicking
   status            Get all servers' status
   vnc               VNC into the first server
-  send <cmd>        Send a command to all servers
   -h --help         Show this screen.
 """
 
@@ -49,6 +53,7 @@ TOKEN = os.getenv("HCLOUD_TOKEN")
 
 
 def get_servers():
+    """ Retrieve all servers """
     client = Client(token=TOKEN)
     servers = client.servers.get_all()
     servers = [s for s in servers if NAME in s.name]
@@ -56,6 +61,7 @@ def get_servers():
 
 
 def status():
+    """ Print the status of all bot servers """
     servers = get_servers()
     for s in servers:
         print(s.status, s.public_net.ipv4.ip)
@@ -102,18 +108,21 @@ def get_key():
 
 
 def destroy_servers():
+    """ Destroy all bots """
     servers = get_servers()
     for s in servers:
         s.delete()
 
 
 def get_ips():
+    """ Get all ips """
     servers = get_servers()
     ips = [s.public_net.ipv4.ip for s in servers]
     return ips
 
 
 def send(cmd, pause=0, user=USER):
+    """ Send a command to all bots """
     hosts = get_ips()
 
     if pause == 0:
@@ -133,15 +142,28 @@ def send(cmd, pause=0, user=USER):
             time.sleep(pause)
 
 
-def bootup(total=PERFORMERS):
-    create_servers(total=total)
+def start_bots():
+    """ Launch zoom and start clicking """
+    send("cd bot; ./joinzoom; DISPLAY=:1 pm2 start ad_clicker.js")
+
+
+def stop_bots():
+    """ Stop zoom and clicking """
+    send("pm2 stop ad_clicker; killall zoom; killall node")
 
 
 def deploy():
+    """ Pull latest from github """
     send("cd bot;git pull;npm install")
 
 
+def bootup(total=PERFORMERS):
+    """ Bootup some bots """
+    create_servers(total=total)
+
+
 def vnc(ip=None):
+    """ VNC into the first server """
     if ip is None:
         ip = get_ips()[0]
     call(["ssh", "-L", "5901:localhost:5901", f"{USER}@{ip}"])
@@ -167,16 +189,15 @@ if __name__ == "__main__":
     if args["status"]:
         status()
 
+    if args["start"]:
+        start_bots()
+
+    if args["stop"]:
+        stop_bots()
+
     if args["vnc"]:
         vnc()
 
     if args["send"]:
         cmd = args["<cmd>"]
         send(cmd)
-
-    # get_keys()
-    # bootup()
-    # start()
-    # send("cd bot; ./joinzoom 94682594244", pause=20)
-    # print(USER)
-    # destroy_servers()
