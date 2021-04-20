@@ -51,7 +51,7 @@ async function getBBox(el) {
 
 async function getRecentArticles() {
   try {
-    let results = await getJSON("http://157.245.247.231/?hostname=" + hostname);
+    let results = await getJSON("http://157.245.247.231/?host=" + hostname);
     return results;
   } catch (e) {
     console.log(e);
