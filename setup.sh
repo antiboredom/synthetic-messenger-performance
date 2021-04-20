@@ -117,4 +117,7 @@ systemctl start vncserver.service
 sudo -H -u syn bash -c 'cd /home/syn/; git clone https://github.com/antiboredom/synthetic-messenger-performance/ bot'
 sudo -H -u syn bash -c 'cd /home/syn/bot; npm install'
 
+# install pm2
+npm install -g pm2
+
 # ONE MORE THING! you must accept zoom's terms and conditions lol
