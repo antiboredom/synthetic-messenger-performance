@@ -58,9 +58,12 @@ def create_servers(size=SIZE, total=PERFORMERS):
 
     # get the last server number
     servers = get_servers()
-    names = [s.name for s in servers]
-    nums = sorted([int(n.split("-")[-1]) for n in names], reverse=True)
-    start = nums[0] + 1
+    if len(servers) > 0:
+        names = [s.name for s in servers]
+        nums = sorted([int(n.split("-")[-1]) for n in names], reverse=True)
+        start = nums[0] + 1
+    else:
+        start = 0
 
     client = Client(token=TOKEN)
     key = get_key()
