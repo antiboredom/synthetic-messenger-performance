@@ -15,6 +15,7 @@ Usage:
   manage.py deploy
   manage.py destroy
   manage.py ips
+  manage.py status
   manage.py vnc
   manage.py send <cmd>
   manage.py -h | --help
@@ -24,6 +25,7 @@ Options:
   deploy            Pull newest changes to all servers
   destroy           Destroy all servers
   ips               List all ips
+  status            Get all servers' status
   vnc               VNC into the first server
   send <cmd>        Send a command to all servers
   -h --help         Show this screen.
@@ -51,6 +53,12 @@ def get_servers():
     servers = client.servers.get_all()
     servers = [s for s in servers if NAME in s.name]
     return servers
+
+
+def status():
+    servers = get_servers()
+    for s in servers:
+        print(s.status, s.public_net.ipv4.ip)
 
 
 def create_servers(size=SIZE, total=PERFORMERS):
@@ -155,6 +163,9 @@ if __name__ == "__main__":
     if args["ips"]:
         for ip in get_ips():
             print(ip)
+
+    if args["status"]:
+        status()
 
     if args["vnc"]:
         vnc()
