@@ -3,6 +3,7 @@ const fs = require("fs");
 const hostname = require("os").hostname();
 const bent = require("bent");
 const getJSON = bent("json");
+const path = require("path");
 
 const width = 1280;
 const height = 720;
@@ -170,9 +171,13 @@ async function main(urls) {
 
   const launchOptions = { headless: false };
 
+  const cookieExtension = path.resolve(__dirname, "cookies_ext/3.3.0_0/");
+
   launchOptions.args = [
     `--window-size=${width},${height}`,
     "--autoplay-policy=no-user-gesture-required",
+    "--disable-extensions-except=" + cookieExtension,
+    "--load-extension=" + cookieExtension,
   ];
   launchOptions.ignoreDefaultArgs = ["--enable-automation"];
 
@@ -191,7 +196,7 @@ async function main(urls) {
   }
 
   if (runForever) {
-    main([])
+    main([]);
   }
 }
 
