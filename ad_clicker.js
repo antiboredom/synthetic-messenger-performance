@@ -7,7 +7,7 @@ const path = require("path");
 
 const width = 1280;
 const height = 720;
-const totalAgents = 1;
+const totalAgents = 3;
 
 let assetNumber;
 
