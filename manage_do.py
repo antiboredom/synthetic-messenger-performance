@@ -98,10 +98,9 @@ def destroy_servers():
         d.destroy()
 
 
-def print_servers():
+def get_ips():
     droplets = get_servers()
-    for d in droplets:
-        print(d.ip_address)
+    return [d.ip_address for d in droplets]
 
 
 def status():
