@@ -121,13 +121,17 @@ async function installBotHelper(page) {
     window.addEventListener(
       "DOMContentLoaded",
       () => {
-        const box = document.createElement("video");
+        // const box = document.createElement("video");
+        //
+        // box.id = "sams-hand";
+        // box.src = assetBase + "hand.webm";
+        // box.setAttribute("autoplay", "");
+        // box.setAttribute("muted", "");
+        // box.setAttribute("loop", "");
 
+        const box = document.createElement("img");
         box.id = "sams-hand";
-        box.src = assetBase + "hand.webm";
-        box.setAttribute("autoplay", "");
-        box.setAttribute("muted", "");
-        box.setAttribute("loop", "");
+        box.src = assetBase + "hand.gif";
 
         const styleElement = document.createElement("style");
 
