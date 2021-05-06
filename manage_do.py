@@ -1,33 +1,54 @@
+#!/usr/bin/env python3
+
 """
-Managers the server farm
-Make sure to run export:
+Manage Synthetic Messenger
+
+Make sure to:
 
 export DIGITALOCEAN_ACCESS_TOKEN="TOKEN"
-
-and
-
 export SYN_USER="USER"
 
 before running this script
+
+Usage:
+  manage_do.py bootup <total>
+  manage_do.py deploy
+  manage_do.py destroy
+  manage_do.py ips
+  manage_do.py send <cmd>
+  manage_do.py start
+  manage_do.py stop
+  manage_do.py status
+  manage_do.py vnc
+  manage_do.py -h | --help
+
+Options:
+  bootup <total>    Boot up <total> number of servers
+  deploy            Pull newest changes to all servers
+  destroy           Destroy all servers
+  ips               List all ips
+  send <cmd>        Send a command to all servers
+  start             Start the zooms and the clicking
+  stop              Stop zooming and clicking
+  status            Get all servers' status
+  vnc               VNC into the first server
+  -h --help         Show this screen.
 """
 
+from docopt import docopt
 import os
 import time
 import digitalocean
 from pssh.clients import ParallelSSHClient, SSHClient
 import click
+from subprocess import call
 
 
-NAME = "synthetic-bot"
+NAME = "synthetic-bot-do"
 SIZE = "s-2vcpu-4gb"
 REGION = "nyc1"
 PERFORMERS = 5
 USER = os.getenv("SYN_USER")
-
-
-@click.group()
-def cli():
-    pass
 
 
 def get_servers():
@@ -71,29 +92,25 @@ def get_sizes():
         print(s.slug)
 
 
-@click.command(name="destroy", help="Destroy all servers")
 def destroy_servers():
     droplets = get_servers()
     for d in droplets:
         d.destroy()
 
 
-@click.command(name="ips", help="Print server ip addresses")
 def print_servers():
     droplets = get_servers()
     for d in droplets:
         print(d.ip_address)
 
 
-@click.command(name="send", help="Send a command to all servers")
-@click.argument("cmd", required=True)
-@click.option(
-    "--pause",
-    "-p",
-    default=0,
-    type=int,
-    help="Pause in seconds between sending to each server",
-)
+def status():
+    """ Print the status of all bot servers """
+    servers = get_servers()
+    for s in servers:
+        print(s.status, s.ip_address)
+
+
 def send(cmd, user=USER, pause=0):
     droplets = get_servers()
     hosts = [d.ip_address for d in droplets]
@@ -115,34 +132,66 @@ def send(cmd, user=USER, pause=0):
             time.sleep(pause)
 
 
-@click.command(name="bootup", help="Boot up servers")
-@click.option(
-    "--total",
-    "-t",
-    type=int,
-    required=True,
-    default=PERFORMERS,
-    help="Total servers to boot up",
-)
 def bootup(total=PERFORMERS):
     image = get_image()
     create_servers(image, total=total)
 
 
-@click.command(name="deploy", help="Deploy from git")
 def deploy():
-    send("cd bot;git pull");
+    send("cd bot;git pull")
 
-cli.add_command(bootup)
-cli.add_command(send)
-cli.add_command(deploy)
-cli.add_command(print_servers)
-cli.add_command(destroy_servers)
+
+def start_bots():
+    """ Launch zoom and start clicking """
+    send("cd bot; ./joinzoom; DISPLAY=:1 pm2 start ad_clicker.js")
+
+
+def stop_bots():
+    """ Stop zoom and clicking """
+    send("pm2 stop ad_clicker; killall zoom; killall node")
+
+
+def deploy():
+    """ Pull latest from github """
+    send("cd bot;git pull;npm install")
+
+
+def vnc(ip=None):
+    """ VNC into the first server """
+    if ip is None:
+        ip = get_ips()[0]
+    call(["ssh", "-L", "5901:localhost:5901", f"{USER}@{ip}"])
+
 
 if __name__ == "__main__":
-    cli()
-    # bootup()
-    # start()
-    # send("cd bot; ./joinzoom 94682594244", pause=20)
-    # print(USER)
-    # destroy_servers()
+    args = docopt(__doc__)
+
+    if args["bootup"]:
+        total = int(args["<total>"])
+        bootup(total=total)
+
+    if args["deploy"]:
+        deploy()
+
+    if args["destroy"]:
+        destroy_servers()
+
+    if args["ips"]:
+        for ip in get_ips():
+            print(ip)
+
+    if args["status"]:
+        status()
+
+    if args["start"]:
+        start_bots()
+
+    if args["stop"]:
+        stop_bots()
+
+    if args["vnc"]:
+        vnc()
+
+    if args["send"]:
+        cmd = args["<cmd>"]
+        send(cmd)
