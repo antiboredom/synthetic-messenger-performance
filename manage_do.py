@@ -46,7 +46,7 @@ from subprocess import call
 
 NAME = "synthetic-bot-do"
 SIZE = "s-2vcpu-4gb"
-REGION = "nyc1"
+REGION = "nyc3"
 PERFORMERS = 5
 USER = os.getenv("SYN_USER")
 
@@ -62,7 +62,16 @@ def create_servers(image, size=SIZE, region=REGION, total=PERFORMERS):
     manager = digitalocean.Manager()
     keys = manager.get_all_sshkeys()
 
-    for i in range(total):
+    # get the last server number
+    servers = get_servers()
+    if len(servers) > 0:
+        names = [s.name for s in servers]
+        nums = sorted([int(n.split("-")[-1]) for n in names], reverse=True)
+        start = nums[0] + 1
+    else:
+        start = 0
+
+    for i in range(start, start + total):
         name = f"{NAME}-{i}"
         droplet = digitalocean.Droplet(
             name=name,
