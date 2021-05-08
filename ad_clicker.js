@@ -5,6 +5,11 @@ const bent = require("bent");
 const getJSON = bent("json");
 const path = require("path");
 
+const KEY = fs.readFileSync("key.txt", { encoding: "utf8" }).trim();
+const api = process.env.SYN_API || "https://syntheticmessenger.labr.io";
+
+const post = bent(api, "POST", "json", 200);
+
 const width = 1280;
 const height = 720;
 const totalAgents = 3;
@@ -51,7 +56,7 @@ async function getBBox(el) {
 
 async function getRecentArticles() {
   try {
-    let results = await getJSON("http://157.245.247.231/?host=" + hostname);
+    let results = await getJSON(`${api}/articles?host=${hostname}&key=${KEY}`);
     return results;
   } catch (e) {
     console.log(e);
@@ -63,6 +68,11 @@ async function clickAds(page, url) {
   try {
     console.log("opening", url);
     await page.goto(url);
+    try {
+      post("/visit", { host: hostname, url: url, key: KEY });
+    } catch (e) {
+      console.log(e);
+    }
   } catch (e) {
     console.log("could not load page");
     console.log(e);
@@ -84,6 +94,12 @@ async function clickAds(page, url) {
         //   e.scrollIntoView({ behavior: "smooth", block: "center" });
         // });
         // await sleep(1500);
+        try {
+          post("/click", { host: hostname, key: KEY });
+        } catch (e) {
+          console.log(e);
+        }
+
         await el.evaluate((e) => {
           window.THESCROLLINGSOUND.play();
           e.scrollIntoView({ behavior: "smooth", block: "center" });

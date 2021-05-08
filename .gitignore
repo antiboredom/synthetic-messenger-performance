@@ -1,4 +1,5 @@
 node_modules/
 venv/
 news.db
+key.txt
 .DS_Store
