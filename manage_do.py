@@ -49,6 +49,9 @@ SIZE = "s-2vcpu-4gb"
 REGION = "nyc3"
 PERFORMERS = 5
 USER = os.getenv("SYN_USER")
+with open("key.txt", "r") as infile:
+    SERVER_KEY = infile.read().strip()
+
 
 
 def get_servers():
@@ -151,7 +154,11 @@ def deploy():
 
 def start_bots():
     """ Launch zoom and start clicking """
-    send("cd bot; ./joinzoom; DISPLAY=:1 pm2 start ad_clicker.js")
+    send(
+        "cd bot; echo '{}' > key.txt; ./joinzoom; DISPLAY=:1 pm2 start ad_clicker.js".format(
+            SERVER_KEY
+        )
+    )
 
 
 def stop_bots():
