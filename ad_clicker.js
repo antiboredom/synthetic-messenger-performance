@@ -210,7 +210,7 @@ async function main(urls) {
       deviceScaleFactor: 2,
     });
     await installBotHelper(page); // Install Mouse Helper
-    page.setDefaultNavigationTimeout(15000);
+    page.setDefaultNavigationTimeout(30000);
     await clickAds(page, url);
     await browser.close();
   }
