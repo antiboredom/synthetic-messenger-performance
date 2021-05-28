@@ -1,0 +1,9 @@
+#!/bin/bash
+
+DISPLAY=:1 xdotool search --name "Zoom Meeting" windowmap windowsize 100% 100%
+sleep 0.5
+DISPLAY=:1 xdotool mousemove 1250 700 click 1
+sleep  0.5
+DISPLAY=:1 xdotool mousemove 640 350 click 1
+sleep 0.5
+killall zoom
