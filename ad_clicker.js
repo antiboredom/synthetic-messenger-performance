@@ -12,7 +12,7 @@ const post = bent(api, "POST", "json", 200);
 
 const width = 1280;
 const height = 720;
-const totalAgents = 33;
+const totalAgents = 34;
 
 let assetNumber;
 
