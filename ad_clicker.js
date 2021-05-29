@@ -33,6 +33,15 @@ let selectors = fs
   .split("\n")
   .filter((s) => s.trim() != "");
 
+const blacklist = new RegExp(
+  fs
+    .readFileSync("blacklist.txt", { encoding: "utf8" })
+    .split("\n")
+    .filter(s => s.trim() != "")
+    .join("|")
+    .replace(/\./g, "[.]")
+);
+
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -57,6 +66,7 @@ async function getBBox(el) {
 async function getRecentArticles() {
   try {
     let results = await getJSON(`${api}/articles?host=${hostname}&key=${KEY}`);
+    results = results.filter(r => !blacklist.test(r));
     return results;
   } catch (e) {
     console.log(e);
