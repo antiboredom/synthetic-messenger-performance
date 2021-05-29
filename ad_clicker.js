@@ -132,7 +132,7 @@ async function clickAds(page, url) {
 }
 
 async function installBotHelper(page) {
-  await page.evaluateOnNewDocument((assetBase) => {
+  await page.evaluateOnNewDocument((assetBase, assetNumber) => {
     if (window !== window.parent) return;
     window.addEventListener(
       "DOMContentLoaded",
@@ -151,6 +151,53 @@ async function installBotHelper(page) {
 
         const styleElement = document.createElement("style");
 
+        const adjustments = [
+          [0, 0],
+          [0, -80],
+          [0, -80],
+          [0, -60],
+          [0, -20],
+          [0, -80],
+          [0, -80],
+          [0, -80],
+          [0, -80],
+          [0, -80],
+          [0, -80],
+          [0, -20],
+          [0, -80],
+          [0, -80],
+          [0, -80],
+          [0, -80],
+          [0, -80],
+          [0, -80],
+          [0, -80],
+          [0, 0],
+          [0, -80],
+          [0, -80],
+          [0, -80],
+          [0, -30],
+          [0, -80],
+          [0, -80],
+          [0, -80],
+          [0, -80],
+          [0, -50],
+          [0, -80],
+          [0, -80],
+          [0, -80],
+          [0, -10],
+          [0, -80],
+        ];
+
+        let xOff = -90;
+        let yOff = -110;
+
+        if (adjustments[assetNumber]) {
+          xOff += adjustments[assetNumber][0] || 0;
+          yOff += adjustments[assetNumber][1] || 0;
+        }
+
+        const w = 300;
+
         styleElement.innerHTML = `
         #sams-hand {
           pointer-events: none;
@@ -158,9 +205,9 @@ async function installBotHelper(page) {
           z-index: 100000000;
           top: 40%;
           left: 40%;
-          margin-top: -110px;
-          margin-left: -90px;
-          width: 300px;
+          margin-top: ${yOff}px;
+          margin-left: ${xOff}px;
+          width: ${w}px;
           transition: 1s all;
         }
       `;
@@ -179,7 +226,7 @@ async function installBotHelper(page) {
       },
       false
     );
-  }, assetBase);
+  }, assetBase, assetNumber);
 }
 
 async function main(urls) {
