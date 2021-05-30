@@ -168,7 +168,8 @@ def stop_bots():
 
 def deploy():
     """ Pull latest from github """
-    send("cd bot;git pull;npm install")
+    # send("cd bot;git pull;npm install")
+    send("cd bot;git pull")
 
 
 def vnc(ip=None):
