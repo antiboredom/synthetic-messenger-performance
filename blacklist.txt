@@ -24,3 +24,13 @@ newscorp.com
 dailycaller.com
 dailymail.co.uk
 breitbart.com
+oann.com
+theblaze.com
+theepochtimes.com
+drudgereport.com
+dailywire.com
+quillette.com
+washingtonexaminer.com
+spectator.org
+cbn.com
+newsmax.com
