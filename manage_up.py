@@ -43,7 +43,7 @@ from pssh.clients import ParallelSSHClient, SSHClient
 from subprocess import call
 
 
-NAME = "synthetic-bot"
+NAME = "synthetic-bot-up"
 SIZE = "2xCPU-4GB"  # cpx31
 PERFORMERS = 5
 USER = os.getenv("SYN_USER")
@@ -143,8 +143,20 @@ def send(cmd, pause=0, user=USER):
             time.sleep(pause)
 
 
+def fix_hostnames():
+    hosts = get_ips()
+    client = ParallelSSHClient(hosts, user=USER)
+    host_args = [
+        {"cmd": "sudo hostnamectl set-hostname synthetic-bot-up-%s" % (i,)}
+        for i in range(len(hosts))
+    ]
+    output = client.run_command("%(cmd)s", host_args=host_args)
+    client.join()
+
+
 def start_bots():
     """ Launch zoom and start clicking """
+    fix_hostnames()
     send(
         "cd bot; echo '{}' > key.txt; ./joinzoom; DISPLAY=:1 pm2 start ad_clicker.js".format(
             SERVER_KEY
