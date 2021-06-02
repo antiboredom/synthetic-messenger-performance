@@ -7,6 +7,7 @@ const path = require("path");
 
 const KEY = fs.readFileSync("key.txt", { encoding: "utf8" }).trim();
 const api = process.env.SYN_API || "https://syntheticmessenger.labr.io";
+const max_time = 60 * 1000;
 
 const post = bent(api, "POST", "json", 200);
 
@@ -259,6 +260,7 @@ async function main(urls) {
     "--load-extension=" + cookieExtension,
   ];
   launchOptions.ignoreDefaultArgs = ["--enable-automation"];
+  let tid;
 
   for (let url of urls) {
     const browser = await puppeteer.launch(launchOptions);
@@ -270,7 +272,18 @@ async function main(urls) {
     });
     await installBotHelper(page); // Install Mouse Helper
     page.setDefaultNavigationTimeout(30000);
-    await clickAds(page, url);
+
+    clearTimeout(tid);
+    tid = setTimeout(async () => {
+      clearTimeout(tid);
+      await browser.close();
+    }, max_time);
+
+    try {
+      await clickAds(page, url);
+    } catch(e) {
+      console.log(e);
+    }
     await browser.close();
   }
 
