@@ -25,7 +25,7 @@ try {
   assetNumber = 0;
 }
 
-const assetBase = `https://syntheticmessenger.s3.us-east-1.amazonaws.com/${assetNumber}/`;
+const assetBase = `https://syntheticmessenger.labr.io/synthetic_static/${assetNumber}/`;
 console.log(assetBase);
 
 let selectors = fs
