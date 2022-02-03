@@ -129,10 +129,10 @@ def send(cmd, user=USER, pause=0):
     if pause == 0:
         client = ParallelSSHClient(hosts, user=user)
         output = client.run_command(cmd)
-        for host_output in output:
-            for line in host_output.stdout:
-                print(line)
-            exit_code = host_output.exit_code
+        # for host_output in output:
+        #     for line in host_output.stdout:
+        #         print(line)
+            # exit_code = host_output.exit_code
     else:
         for host in hosts:
             client = SSHClient(host, user=user)

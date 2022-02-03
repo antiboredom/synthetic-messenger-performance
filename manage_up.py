@@ -129,17 +129,20 @@ def send(cmd, pause=0, user=USER):
     if pause == 0:
         client = ParallelSSHClient(hosts, user=user)
         output = client.run_command(cmd)
-        for host_output in output:
-            for line in host_output.stdout:
-                print(line)
-            exit_code = host_output.exit_code
+        # for host_output in output:
+        #     for line in host_output.stdout:
+        #         print(line)
+        #     exit_code = host_output.exit_code
     else:
         for host in hosts:
-            client = SSHClient(host, user=user)
-            output = client.run_command(cmd)
-            for line in output.stdout:
-                print(line)
-            exit_code = output.exit_code
+            try:
+                client = SSHClient(host, user=user)
+                output = client.run_command(cmd)
+            except Exception as e:
+                print(e)
+            # for line in output.stdout:
+            #     print(line)
+            # exit_code = output.exit_code
             time.sleep(pause)
 
 
@@ -160,19 +163,19 @@ def start_bots():
     send(
         "cd bot; echo '{}' > key.txt; ./joinzoom; DISPLAY=:1 pm2 start ad_clicker.js".format(
             SERVER_KEY
-        )
+        ), pause=0.01
     )
 
 
 def stop_bots():
     """ Stop zoom and clicking """
-    send("pm2 stop ad_clicker; killall zoom; killall node")
+    send("pm2 stop ad_clicker; killall zoom; killall node", pause=0.01)
 
 
 def deploy():
     """ Pull latest from github """
     # send("cd bot;git pull;npm install")
-    send("cd bot;git pull")
+    send("cd bot;git pull", pause=0.01)
 
 
 def bootup(total=PERFORMERS):
