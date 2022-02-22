@@ -16,4 +16,4 @@ cd /home/pi/bot
 npm install
 
 # install pm2
-npm install -g pm2
+sudo npm install -g pm2
