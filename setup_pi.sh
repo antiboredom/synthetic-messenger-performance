@@ -1,12 +1,12 @@
 #!/bin/bash
 
 # install the stuff
-apt update
-apt -y install wmctrl  xdotool
+sudo apt update
+sudo apt -y install wmctrl  xdotool
 
 # install node
-curl -fsSL https://deb.nodesource.com/setup_14.x | bash -
-apt-get install -y nodejs
+curl -fsSL https://deb.nodesource.com/setup_14.x | sudo bash -
+sudo apt-get install -y nodejs
 
 # clone the repo and install deps
 cd /home/pi
