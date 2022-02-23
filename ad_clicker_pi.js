@@ -7,7 +7,7 @@ const path = require("path");
 
 const KEY = fs.readFileSync("key.txt", { encoding: "utf8" }).trim();
 const api = process.env.SYN_API || "https://syntheticmessenger.labr.io";
-const max_time = 60 * 1000;
+const max_time = 90 * 1000;
 
 const post = bent(api, "POST", "json", 200);
 
@@ -38,7 +38,7 @@ const denylist = new RegExp(
   fs
     .readFileSync("denylist.txt", { encoding: "utf8" })
     .split("\n")
-    .filter(s => s.trim() != "")
+    .filter((s) => s.trim() != "")
     .join("|")
     .replace(/\./g, "[.]")
 );
@@ -67,7 +67,7 @@ async function getBBox(el) {
 async function getRecentArticles() {
   try {
     let results = await getJSON(`${api}/articles?host=${hostname}&key=${KEY}`);
-    results = results.filter(r => !denylist.test(r));
+    results = results.filter((r) => !denylist.test(r));
     return results;
   } catch (e) {
     console.log(e);
@@ -143,75 +143,76 @@ async function clickAds(page, url) {
 }
 
 async function installBotHelper(page) {
-  await page.evaluateOnNewDocument((assetBase, assetNumber) => {
-    if (window !== window.parent) return;
-    window.addEventListener(
-      "DOMContentLoaded",
-      () => {
-        // const box = document.createElement("video");
-        //
-        // box.id = "sams-hand";
-        // box.src = assetBase + "hand.webm";
-        // box.setAttribute("autoplay", "");
-        // box.setAttribute("muted", "");
-        // box.setAttribute("loop", "");
+  await page.evaluateOnNewDocument(
+    (assetBase, assetNumber) => {
+      if (window !== window.parent) return;
+      window.addEventListener(
+        "DOMContentLoaded",
+        () => {
+          // const box = document.createElement("video");
+          //
+          // box.id = "sams-hand";
+          // box.src = assetBase + "hand.webm";
+          // box.setAttribute("autoplay", "");
+          // box.setAttribute("muted", "");
+          // box.setAttribute("loop", "");
 
-        const box = document.createElement("img");
-        box.id = "sams-hand";
-        box.src = assetBase + "hand.gif";
+          const box = document.createElement("img");
+          box.id = "sams-hand";
+          box.src = assetBase + "hand.gif";
 
-        const styleElement = document.createElement("style");
+          const styleElement = document.createElement("style");
 
-        const adjustments = [
-          [0, 0],
-          [0, -80],
-          [0, -80],
-          [0, -60],
-          [0, -20],
-          [0, -80],
-          [0, -80],
-          [0, -80],
-          [0, -80],
-          [0, -80],
-          [0, -80],
-          [0, -20],
-          [0, -80],
-          [0, -80],
-          [0, -80],
-          [0, -80],
-          [0, -80],
-          [0, -80],
-          [0, -80],
-          [0, 0],
-          [0, -80],
-          [0, -80],
-          [0, -80],
-          [0, -30],
-          [0, -80],
-          [0, -80],
-          [0, -80],
-          [0, -80],
-          [0, -50],
-          [0, -80],
-          [0, -80],
-          [0, -80],
-          [0, -10],
-          [0, -80],
-          [0, -30],
-          [0, -30],
-        ];
+          const adjustments = [
+            [0, 0],
+            [0, -80],
+            [0, -80],
+            [0, -60],
+            [0, -20],
+            [0, -80],
+            [0, -80],
+            [0, -80],
+            [0, -80],
+            [0, -80],
+            [0, -80],
+            [0, -20],
+            [0, -80],
+            [0, -80],
+            [0, -80],
+            [0, -80],
+            [0, -80],
+            [0, -80],
+            [0, -80],
+            [0, 0],
+            [0, -80],
+            [0, -80],
+            [0, -80],
+            [0, -30],
+            [0, -80],
+            [0, -80],
+            [0, -80],
+            [0, -80],
+            [0, -50],
+            [0, -80],
+            [0, -80],
+            [0, -80],
+            [0, -10],
+            [0, -80],
+            [0, -30],
+            [0, -30],
+          ];
 
-        let xOff = -90;
-        let yOff = -110;
+          let xOff = -90;
+          let yOff = -110;
 
-        if (adjustments[assetNumber]) {
-          xOff += adjustments[assetNumber][0] || 0;
-          yOff += adjustments[assetNumber][1] || 0;
-        }
+          if (adjustments[assetNumber]) {
+            xOff += adjustments[assetNumber][0] || 0;
+            yOff += adjustments[assetNumber][1] || 0;
+          }
 
-        const w = 300;
+          const w = 300;
 
-        styleElement.innerHTML = `
+          styleElement.innerHTML = `
         #sams-hand {
           pointer-events: none;
           position: absolute;
@@ -224,22 +225,25 @@ async function installBotHelper(page) {
           transition: 1s all;
         }
       `;
-        document.head.appendChild(styleElement);
-        document.body.appendChild(box);
+          document.head.appendChild(styleElement);
+          document.body.appendChild(box);
 
-        const click = document.createElement("audio");
-        click.id = "synthetic-click-sample";
-        click.src = assetBase + "click.ogg";
-        window.THECLICKINGSOUND = click;
+          const click = document.createElement("audio");
+          click.id = "synthetic-click-sample";
+          click.src = assetBase + "click.ogg";
+          window.THECLICKINGSOUND = click;
 
-        const scroll = document.createElement("audio");
-        scroll.id = "synthetic-scroll-sample";
-        scroll.src = assetBase + "scroll.ogg";
-        window.THESCROLLINGSOUND = scroll;
-      },
-      false
-    );
-  }, assetBase, assetNumber);
+          const scroll = document.createElement("audio");
+          scroll.id = "synthetic-scroll-sample";
+          scroll.src = assetBase + "scroll.ogg";
+          window.THESCROLLINGSOUND = scroll;
+        },
+        false
+      );
+    },
+    assetBase,
+    assetNumber
+  );
 }
 
 async function main(urls) {
@@ -249,12 +253,17 @@ async function main(urls) {
     runForever = true;
   }
 
-  const launchOptions = { headless: false, executablePath: '/usr/bin/chromium-browser', };
+  const launchOptions = {
+    headless: false,
+    executablePath: "/usr/bin/chromium-browser",
+    defaultViewport: null,
+  };
 
   const cookieExtension = path.resolve(__dirname, "cookies_ext/3.3.0_0/");
 
   launchOptions.args = [
-    `--window-size=${width},${height}`,
+    // `--window-size=${width},${height}`,
+    "--start-maximized",
     "--autoplay-policy=no-user-gesture-required",
     "--disable-extensions-except=" + cookieExtension,
     "--load-extension=" + cookieExtension,
@@ -265,11 +274,11 @@ async function main(urls) {
   for (let url of urls) {
     const browser = await puppeteer.launch(launchOptions);
     const page = await browser.newPage();
-    await page.setViewport({
-      width: width,
-      height: height,
-      deviceScaleFactor: 2,
-    });
+    // await page.setViewport({
+    //   width: width,
+    //   height: height,
+    //   deviceScaleFactor: 2,
+    // });
     await installBotHelper(page); // Install Mouse Helper
     page.setDefaultNavigationTimeout(60000);
 
@@ -281,7 +290,7 @@ async function main(urls) {
 
     try {
       await clickAds(page, url);
-    } catch(e) {
+    } catch (e) {
       console.log(e);
     }
     await browser.close();
