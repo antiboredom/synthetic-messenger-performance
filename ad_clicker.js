@@ -11,8 +11,8 @@ const max_time = 60 * 1000;
 
 const post = bent(api, "POST", "json", 200);
 
-const width = 1280;
-const height = 720;
+const width = process.env.WIDTH || 1280;
+const height = process.env.HEIGHT || 720;
 const totalAgents = 36;
 
 let assetNumber;
