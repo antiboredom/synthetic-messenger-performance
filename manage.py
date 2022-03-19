@@ -16,6 +16,8 @@ Usage:
   manage.py destroy
   manage.py ips
   manage.py send <cmd>
+  manage.py record
+  manage.py stop_record
   manage.py start
   manage.py stop
   manage.py status
@@ -28,6 +30,8 @@ Options:
   destroy           Destroy all servers
   ips               List all ips
   send <cmd>        Send a command to all servers
+  record            Record the bots
+  stop_record       Stop record bots
   start             Start the zooms and the clicking
   stop              Stop zooming and clicking
   status            Get all servers' status
@@ -46,7 +50,10 @@ from subprocess import call
 
 
 NAME = "synthetic-bot"
-SIZE = "cx21"  # cpx31
+# SIZE = "cx21"  # cpx31
+# SIZE = "ccx11"  # cpx31
+# SIZE = "ccx21"  # cpx31
+SIZE = "cx51"  # cpx31
 PERFORMERS = 5
 USER = os.getenv("SYN_USER")
 TOKEN = os.getenv("HCLOUD_TOKEN")
@@ -155,6 +162,41 @@ def start_bots():
     )
 
 
+def record_bots():
+    """ Launch bot and record output"""
+
+    # WIDTH = 1280
+    # HEIGHT = 720
+
+    # WIDTH = 1536
+    # HEIGHT = 864
+
+    WIDTH = 1406
+    HEIGHT = 792
+
+    send("vncserver -kill :1")
+    send(f"vncserver :1 -geometry {WIDTH}x{HEIGHT}")
+    send("killall ffmpeg")
+    send('DISPLAY=:1 xdotool search --name "VNC config" windowminimize')
+    send(f"DISPLAY=:1 xdotool mousemove {WIDTH} {HEIGHT}")
+
+    # ffmpeg_command = "killall -9 ffmpeg; ffmpeg -y -f x11grab -r 25 -s 1280x720 -i :1.0+0,0 -threads 0 -f pulse -ac 2 -i default recording.mkv"
+
+    # small file, big cpu
+    ffmpeg_command = "killall -9 ffmpeg; ffmpeg -y -video_size 1280x720 -framerate 25 -f x11grab -i :1.0+0,0 -threads 0 -f pulse -ac 2 -i default recording.mkv"
+
+    # big file, small cpu
+    ffmpeg_command = f"killall -9 ffmpeg; ffmpeg -y  -f pulse -ac 2 -i default -video_size {WIDTH}x{HEIGHT} -framerate 25 -f x11grab -i :1.0+0,0 -vcodec libx264 -pix_fmt yuv420p -preset ultrafast -crf 0 -threads 0 recording.mkv"
+    # ffmpeg_command = "killall -9 ffmpeg; ffmpeg -y -f x11grab -r 30 -s 1280x720 -i :1.0+0,0 -threads 0 -c:v libx264rgb -crf 0 -preset ultrafast -color_range 2 -f pulse -ac 2 -i default recording.mkv"
+    send(ffmpeg_command, pause=0)
+
+    start_command = f"cd bot; echo '{SERVER_KEY}' > key.txt; DISPLAY=:1 WIDTH={WIDTH} HEIGHT={HEIGHT} pm2 start ad_clicker.js"
+    send(start_command, pause=0)
+
+
+def stop_record():
+    send("pm2 stop ad_clicker; killall zoom; killall node; killall ffmpeg")
+
 def stop_bots():
     """ Stop zoom and clicking """
     send("pm2 stop ad_clicker; killall zoom; killall node")
@@ -200,6 +242,12 @@ if __name__ == "__main__":
 
     if args["start"]:
         start_bots()
+
+    if args["record"]:
+        record_bots()
+
+    if args["stop_record"]:
+        stop_record()
 
     if args["stop"]:
         stop_bots()
