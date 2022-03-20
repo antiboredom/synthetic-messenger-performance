@@ -7,7 +7,7 @@ const path = require("path");
 
 const KEY = fs.readFileSync("key.txt", { encoding: "utf8" }).trim();
 const api = process.env.SYN_API || "https://syntheticmessenger.labr.io";
-const max_time = 60 * 1000;
+const max_time = 80 * 1000;
 
 const post = bent(api, "POST", "json", 200);
 
@@ -92,7 +92,7 @@ async function clickAds(page, url) {
 
   let adCoords = [];
 
-  await sleep(2500);
+  await sleep(3500);
 
   let elements = await page.$$(selectors.join(","));
 
@@ -256,6 +256,7 @@ async function main(urls) {
   launchOptions.args = [
     `--window-size=${width},${height}`,
     "--window-position=0,0",
+    "--no-default-browser-check",
     "--autoplay-policy=no-user-gesture-required",
     "--disable-extensions-except=" + cookieExtension,
     "--load-extension=" + cookieExtension,
@@ -272,7 +273,7 @@ async function main(urls) {
       deviceScaleFactor: 2,
     });
     await installBotHelper(page); // Install Mouse Helper
-    page.setDefaultNavigationTimeout(30000);
+    page.setDefaultNavigationTimeout(50000);
 
     clearTimeout(tid);
     tid = setTimeout(async () => {
