@@ -255,6 +255,7 @@ async function main(urls) {
 
   launchOptions.args = [
     `--window-size=${width},${height}`,
+    "--window-position=0,0",
     "--autoplay-policy=no-user-gesture-required",
     "--disable-extensions-except=" + cookieExtension,
     "--load-extension=" + cookieExtension,
