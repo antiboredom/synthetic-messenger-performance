@@ -109,6 +109,10 @@ async function clickAds(page, url) {
   }
 
   if (goodEls.length > 0) {
+    await page.evaluate(() => window.THECLICKINGSOUND.play());
+    await page.evaluate(() => window.THESCROLLINGSOUND.play());
+    await sleep(2000);
+
     let outname = `recordings/${new Date().getTime()}.mkv`;
     // let recorderCommand = `killall -9 ffmpeg; ffmpeg -y  -f pulse -ac 2 -i default -video_size ${width}x${height} -framerate 60 -f x11grab -i :1.0+0,0 -vcodec libx264 -pix_fmt yuv420p -preset ultrafast -crf 0 -threads 0 ${outname}`;
     let recorderCommand = `killall -9 ffmpeg; ffmpeg -y  -f pulse -ac 2 -i default -video_size ${width}x${height} -framerate 60 -f x11grab -i :1.0+0,0 -vcodec libx264 -pix_fmt yuv420p -preset veryfast -crf 15 -threads 0 ${outname}`;
