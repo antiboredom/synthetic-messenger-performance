@@ -18,6 +18,7 @@ Usage:
   manage.py send <cmd>
   manage.py record
   manage.py stop_record
+  manage.py combine_record
   manage.py start
   manage.py stop
   manage.py status
@@ -32,6 +33,7 @@ Options:
   send <cmd>        Send a command to all servers
   record            Record the bots
   stop_record       Stop record bots
+  combine_record    Combine recorded videos
   start             Start the zooms and the clicking
   stop              Stop zooming and clicking
   status            Get all servers' status
@@ -189,15 +191,21 @@ def record_bots():
     # ffmpeg_command = f"killall -9 ffmpeg; ffmpeg -y  -f pulse -ac 2 -i default -video_size {WIDTH}x{HEIGHT} -framerate 60 -f x11grab -i :1.0+0,0 -vcodec libx264 -pix_fmt yuv420p -preset veryfast -crf 15 -threads 0 recording.mkv"
 
     # big file, small cpu
-    ffmpeg_command = f"killall -9 ffmpeg; ffmpeg -y  -f pulse -ac 2 -i default -video_size {WIDTH}x{HEIGHT} -framerate 25 -f x11grab -i :1.0+0,0 -vcodec libx264 -pix_fmt yuv420p -preset ultrafast -crf 0 -threads 0 recording.mkv"
-    send(ffmpeg_command, pause=0)
+    # ffmpeg_command = f"killall -9 ffmpeg; ffmpeg -y  -f pulse -ac 2 -i default -video_size {WIDTH}x{HEIGHT} -framerate 25 -f x11grab -i :1.0+0,0 -vcodec libx264 -pix_fmt yuv420p -preset ultrafast -crf 0 -threads 0 recording.mkv"
+    # send(ffmpeg_command, pause=0)
 
-    start_command = f"cd bot; echo '{SERVER_KEY}' > key.txt; DISPLAY=:1 WIDTH={WIDTH} HEIGHT={HEIGHT} pm2 start ad_clicker.js"
+    start_command = f"cd bot; echo '{SERVER_KEY}' > key.txt; DISPLAY=:1 WIDTH={WIDTH} HEIGHT={HEIGHT} pm2 start ad_clicker_record.js"
     send(start_command, pause=0)
 
 
 def stop_record():
-    send("pm2 stop ad_clicker; killall zoom; killall node; killall ffmpeg")
+    send("pm2 stop ad_clicker_record; killall zoom; killall node; killall ffmpeg")
+
+
+def combine_recordings():
+    send('''printf "file '%s'\n" bot/recordings/*.mkv > vidlist.txt''')
+    send("ffmpeg -y -f concat -safe 0 -i vidlist.txt -c copy recording.mkv")
+
 
 def stop_bots():
     """ Stop zoom and clicking """
@@ -250,6 +258,9 @@ if __name__ == "__main__":
 
     if args["stop_record"]:
         stop_record()
+
+    if args["combine_record"]:
+        combine_recordings()
 
     if args["stop"]:
         stop_bots()
