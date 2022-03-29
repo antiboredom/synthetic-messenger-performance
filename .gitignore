@@ -3,3 +3,5 @@ venv/
 news.db
 key.txt
 .DS_Store
+*.mkv
+*.mp4
