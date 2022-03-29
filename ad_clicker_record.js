@@ -137,7 +137,7 @@ async function clickAds(page, url) {
             setTimeout(() => {
               e.style.outline = oldBorder;
             }, 200);
-          }, 1000);
+          }, 2000);
         });
         await sleep(2000);
         await page.evaluate(() => window.THECLICKINGSOUND.play());
