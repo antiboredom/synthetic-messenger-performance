@@ -109,12 +109,12 @@ async function clickAds(page, url) {
   }
 
   if (goodEls.length > 0) {
-    await sleep(2000)
     let outname = `recordings/${new Date().getTime()}.mkv`;
-    let recorderCommand = `killall -9 ffmpeg; ffmpeg -y  -f pulse -ac 2 -i default -video_size ${width}x${height} -framerate 60 -f x11grab -i :1.0+0,0 -vcodec libx264 -pix_fmt yuv420p -preset ultrafast -crf 0 -threads 0 ${outname}`;
-    // let recorderCommand = `killall -9 ffmpeg; ffmpeg -y  -f pulse -ac 2 -i default -video_size ${width}x${height} -framerate 60 -f x11grab -i :1.0+0,0 -vcodec libx264 -pix_fmt yuv420p -preset veryfast -crf 15 -threads 0 ${outname}`;
+    // let recorderCommand = `killall -9 ffmpeg; ffmpeg -y  -f pulse -ac 2 -i default -video_size ${width}x${height} -framerate 60 -f x11grab -i :1.0+0,0 -vcodec libx264 -pix_fmt yuv420p -preset ultrafast -crf 0 -threads 0 ${outname}`;
+    let recorderCommand = `killall -9 ffmpeg; ffmpeg -y  -f pulse -ac 2 -i default -video_size ${width}x${height} -framerate 60 -f x11grab -i :1.0+0,0 -vcodec libx264 -pix_fmt yuv420p -preset veryfast -crf 15 -threads 0 ${outname}`;
     console.log('recording', outname);
     exec(recorderCommand);
+    await sleep(2000)
 
     for (let el of goodEls) {
       try {
@@ -139,7 +139,7 @@ async function clickAds(page, url) {
             }, 200);
           }, 1000);
         });
-        await sleep(1000);
+        await sleep(1300);
         await page.evaluate(() => window.THECLICKINGSOUND.play());
         await el.click({ button: "middle" });
         await sleep(500);
@@ -152,7 +152,6 @@ async function clickAds(page, url) {
       await sleep(500);
     }
   }
-  console.log('stop recording');
   exec(`killall ffmpeg`);
 
   return true;
