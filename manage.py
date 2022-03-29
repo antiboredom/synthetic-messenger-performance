@@ -47,13 +47,15 @@ from hcloud.images.domain import Image
 from hcloud.server_types.domain import ServerType
 from pssh.clients import ParallelSSHClient, SSHClient
 from subprocess import call
+from functools import lru_cache
 
 
 NAME = "synthetic-bot"
 # SIZE = "cx21"  # cpx31
 # SIZE = "ccx11"  # cpx31
 # SIZE = "ccx21"  # cpx31
-SIZE = "cx51"  # cpx31
+# SIZE = "cx51"  # cpx31
+SIZE = "cpx51"  # cpx31
 PERFORMERS = 5
 USER = os.getenv("SYN_USER")
 TOKEN = os.getenv("HCLOUD_TOKEN")
@@ -62,6 +64,7 @@ with open("key.txt", "r") as infile:
     SERVER_KEY = infile.read().strip()
 
 
+@lru_cache
 def get_servers():
     """ Retrieve all servers """
     client = Client(token=TOKEN)
@@ -183,11 +186,10 @@ def record_bots():
     # ffmpeg_command = "killall -9 ffmpeg; ffmpeg -y -f x11grab -r 25 -s 1280x720 -i :1.0+0,0 -threads 0 -f pulse -ac 2 -i default recording.mkv"
 
     # small file, big cpu
-    ffmpeg_command = "killall -9 ffmpeg; ffmpeg -y -video_size 1280x720 -framerate 25 -f x11grab -i :1.0+0,0 -threads 0 -f pulse -ac 2 -i default recording.mkv"
+    # ffmpeg_command = f"killall -9 ffmpeg; ffmpeg -y  -f pulse -ac 2 -i default -video_size {WIDTH}x{HEIGHT} -framerate 60 -f x11grab -i :1.0+0,0 -vcodec libx264 -pix_fmt yuv420p -preset veryfast -crf 15 -threads 0 recording.mkv"
 
     # big file, small cpu
     ffmpeg_command = f"killall -9 ffmpeg; ffmpeg -y  -f pulse -ac 2 -i default -video_size {WIDTH}x{HEIGHT} -framerate 25 -f x11grab -i :1.0+0,0 -vcodec libx264 -pix_fmt yuv420p -preset ultrafast -crf 0 -threads 0 recording.mkv"
-    # ffmpeg_command = "killall -9 ffmpeg; ffmpeg -y -f x11grab -r 30 -s 1280x720 -i :1.0+0,0 -threads 0 -c:v libx264rgb -crf 0 -preset ultrafast -color_range 2 -f pulse -ac 2 -i default recording.mkv"
     send(ffmpeg_command, pause=0)
 
     start_command = f"cd bot; echo '{SERVER_KEY}' > key.txt; DISPLAY=:1 WIDTH={WIDTH} HEIGHT={HEIGHT} pm2 start ad_clicker.js"
