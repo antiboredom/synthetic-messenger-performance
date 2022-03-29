@@ -4,6 +4,7 @@ const hostname = require("os").hostname();
 const bent = require("bent");
 const getJSON = bent("json");
 const path = require("path");
+const { exec } = require('child_process');
 
 const KEY = fs.readFileSync("key.txt", { encoding: "utf8" }).trim();
 const api = process.env.SYN_API || "https://syntheticmessenger.labr.io";
