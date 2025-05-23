@@ -23,6 +23,7 @@ Usage:
   manage.py stop
   manage.py status
   manage.py vnc
+  manage.py showimage
   manage.py -h | --help
 
 Options:
@@ -38,6 +39,7 @@ Options:
   stop              Stop zooming and clicking
   status            Get all servers' status
   vnc               VNC into the first server
+  showimage         Show which image we're using
   -h --help         Show this screen.
 """
 
@@ -68,7 +70,7 @@ with open("key.txt", "r") as infile:
 
 @lru_cache
 def get_servers():
-    """ Retrieve all servers """
+    """Retrieve all servers"""
     client = Client(token=TOKEN)
     servers = client.servers.get_all()
     servers = [s for s in servers if NAME in s.name]
@@ -76,7 +78,7 @@ def get_servers():
 
 
 def status():
-    """ Print the status of all bot servers """
+    """Print the status of all bot servers"""
     servers = get_servers()
     for s in servers:
         print(s.status, s.public_net.ipv4.ip)
@@ -108,7 +110,7 @@ def create_servers(size=SIZE, total=PERFORMERS):
 
 
 def get_image():
-    """ Gets the most recent synthetic messenger image"""
+    """Gets the most recent synthetic messenger image"""
     client = Client(token=TOKEN)
     images = client.images.get_all()
     images = [i for i in images if "synthetic" in i.description]
@@ -116,28 +118,28 @@ def get_image():
 
 
 def get_key():
-    """ Gets the most recent synthetic messenger image"""
+    """Gets the most recent synthetic messenger image"""
     client = Client(token=TOKEN)
     keys = client.ssh_keys.get_list()
     return keys[0][0]
 
 
 def destroy_servers():
-    """ Destroy all bots """
+    """Destroy all bots"""
     servers = get_servers()
     for s in servers:
         s.delete()
 
 
 def get_ips():
-    """ Get all ips """
+    """Get all ips"""
     servers = get_servers()
     ips = [s.public_net.ipv4.ip for s in servers]
     return ips
 
 
 def send(cmd, pause=0, user=USER):
-    """ Send a command to all bots """
+    """Send a command to all bots"""
     hosts = get_ips()
 
     if pause == 0:
@@ -158,7 +160,7 @@ def send(cmd, pause=0, user=USER):
 
 
 def start_bots():
-    """ Launch zoom and start clicking """
+    """Launch zoom and start clicking"""
     send(
         "cd bot; echo '{}' > key.txt; ./joinzoom; DISPLAY=:1 pm2 start ad_clicker.js".format(
             SERVER_KEY
@@ -168,7 +170,7 @@ def start_bots():
 
 
 def record_bots():
-    """ Launch bot and record output"""
+    """Launch bot and record output"""
 
     # WIDTH = 1280
     # HEIGHT = 720
@@ -203,28 +205,28 @@ def stop_record():
 
 
 def combine_recordings():
-    send('''printf "file '%s'\n" bot/recordings/*.mkv > vidlist.txt''')
+    send("""printf "file '%s'\n" bot/recordings/*.mkv > vidlist.txt""")
     send("ffmpeg -y -f concat -safe 0 -i vidlist.txt -c copy recording.mkv")
 
 
 def stop_bots():
-    """ Stop zoom and clicking """
+    """Stop zoom and clicking"""
     send("pm2 stop ad_clicker; killall zoom; killall node")
 
 
 def deploy():
-    """ Pull latest from github """
+    """Pull latest from github"""
     # send("cd bot;git pull;npm install")
     send("cd bot;git pull")
 
 
 def bootup(total=PERFORMERS):
-    """ Bootup some bots """
+    """Bootup some bots"""
     create_servers(total=total)
 
 
 def vnc(ip=None):
-    """ VNC into the first server """
+    """VNC into the first server"""
     if ip is None:
         ip = get_ips()[0]
     call(["ssh", "-L", "5901:localhost:5901", f"{USER}@{ip}"])
@@ -267,6 +269,10 @@ if __name__ == "__main__":
 
     if args["vnc"]:
         vnc()
+
+    if args["showimage"]:
+        image = get_image()
+        print("ID:", image.id)
 
     if args["send"]:
         cmd = args["<cmd>"]

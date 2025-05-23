@@ -1,0 +1,11 @@
+[project]
+name = "synthetic-messenger-performance"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "docopt>=0.6.2",
+    "hcloud>=2.5.1",
+    "parallel-ssh>=2.14.0",
+]
