@@ -19,6 +19,7 @@ Usage:
   manage.py record
   manage.py stop_record
   manage.py combine_record
+  manage.py count_recordings
   manage.py start
   manage.py stop
   manage.py status
@@ -35,6 +36,7 @@ Options:
   record            Record the bots
   stop_record       Stop record bots
   combine_record    Combine recorded videos
+  count_recordings  Count recordings on all hosts
   start             Start the zooms and the clicking
   stop              Stop zooming and clicking
   status            Get all servers' status
@@ -159,6 +161,15 @@ def send(cmd, pause=0, user=USER):
             time.sleep(pause)
 
 
+def count_recordings():
+    hosts = get_ips()
+    client = ParallelSSHClient(hosts, user=USER)
+    output = client.run_command(f"ls /home/{USER}/bot/recordings/*.mkv | wc -l")
+    for host_output in output:
+        for line in host_output.stdout:
+            print(line)
+
+
 def start_bots():
     """Launch zoom and start clicking"""
     send(
@@ -260,6 +271,9 @@ if __name__ == "__main__":
 
     if args["stop_record"]:
         stop_record()
+
+    if args["count_recordings"]:
+        count_recordings()
 
     if args["combine_record"]:
         combine_recordings()
