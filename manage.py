@@ -148,7 +148,7 @@ def send(cmd, pause=0, user=USER):
 
     if pause == 0:
         client = ParallelSSHClient(hosts, user=user)
-        output = client.run_command(cmd)
+        output = client.run_command(cmd, stop_on_errors=True)
         # for host_output in output:
         #     for line in host_output.stdout:
         #         print(line)
@@ -185,19 +185,33 @@ def start_bots():
 def record_bots():
     """Launch bot and record output"""
 
+    # UNUSED!
     # WIDTH = 1280
     # HEIGHT = 720
-
     # WIDTH = 1536
     # HEIGHT = 864
 
+    # for desktop
     WIDTH = 1406
     HEIGHT = 792
 
+    # for mobile
+    WIDTH = 792
+    HEIGHT = 1406
+
+    print("killing vnc")
     send("vncserver -kill :1")
+
+    print("starting vnc")
     send(f"vncserver :1 -geometry {WIDTH}x{HEIGHT}")
+
+    print("killing ffmpg")
     send("killall ffmpeg")
+
+    print("minimizing window")
     send('DISPLAY=:1 xdotool search --name "VNC config" windowminimize')
+
+    print("moving mouse")
     send(f"DISPLAY=:1 xdotool mousemove {WIDTH} {HEIGHT}")
 
     # ffmpeg_command = "killall -9 ffmpeg; ffmpeg -y -f x11grab -r 25 -s 1280x720 -i :1.0+0,0 -threads 0 -f pulse -ac 2 -i default recording.mkv"
@@ -209,6 +223,7 @@ def record_bots():
     # ffmpeg_command = f"killall -9 ffmpeg; ffmpeg -y  -f pulse -ac 2 -i default -video_size {WIDTH}x{HEIGHT} -framerate 25 -f x11grab -i :1.0+0,0 -vcodec libx264 -pix_fmt yuv420p -preset ultrafast -crf 0 -threads 0 recording.mkv"
     # send(ffmpeg_command, pause=0)
 
+    print("start pm2 and record")
     start_command = f"cd bot; echo '{SERVER_KEY}' > key.txt; DISPLAY=:1 WIDTH={WIDTH} HEIGHT={HEIGHT} pm2 start ad_clicker_record.js"
     send(start_command, pause=0)
 
@@ -224,14 +239,22 @@ def combine_recordings():
 
 def download_recordings():
     hosts = get_ips()
-    for h in hosts:
-        client = SSHClient(h, user=USER)
-        output = client.run_command("hostname")
-        hostname = "".join(output.stdout).strip()
-        client.copy_remote_file(
-            f"/home/{USER}/recording.mp4",
-            f"/Users/sam/projects/synthetic-messenger-performance/saved_recordings/{hostname}.mp4",
-        )
+    client = ParallelSSHClient(hosts, user=USER)
+
+    filename = "/Users/sam/projects/synthetic-messenger-performance/saved_recordings/recording.mp4"
+    cmds = client.copy_remote_file(f"/home/{USER}/recording.mp4", filename)
+    joinall(cmds, raise_error=True)
+
+    # for h in hosts:
+    #     client = SSHClient(h, user=USER)
+    #     output = client.run_command("hostname")
+    #     hostname = "".join(output.stdout).strip()
+    #     filename = f"/Users/sam/projects/synthetic-messenger-performance/saved_recordings/{hostname}.mp4"
+    #
+    #     print(filename)
+    #     if os.path.exists(filename):
+    #         continue
+    #     client.copy_remote_file(f"/home/{USER}/recording.mp4", filename)
 
 
 def stop_bots():
