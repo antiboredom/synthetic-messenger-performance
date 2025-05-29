@@ -20,6 +20,7 @@ Usage:
   manage.py stop_record
   manage.py combine_record
   manage.py count_recordings
+  manage.py download
   manage.py start
   manage.py stop
   manage.py status
@@ -37,6 +38,7 @@ Options:
   stop_record       Stop record bots
   combine_record    Combine recorded videos
   count_recordings  Count recordings on all hosts
+  download          Download recordings
   start             Start the zooms and the clicking
   stop              Stop zooming and clicking
   status            Get all servers' status
@@ -54,7 +56,7 @@ from hcloud.server_types.domain import ServerType
 from pssh.clients import ParallelSSHClient, SSHClient
 from subprocess import call
 from functools import lru_cache
-
+from gevent import joinall
 
 NAME = "synthetic-bot"
 # SIZE = "cx21"  # cpx31
@@ -220,6 +222,18 @@ def combine_recordings():
     send("ffmpeg -y -f concat -safe 0 -i vidlist.txt -c copy recording.mkv")
 
 
+def download_recordings():
+    hosts = get_ips()
+    for h in hosts:
+        client = SSHClient(h, user=USER)
+        output = client.run_command("hostname")
+        hostname = "".join(output.stdout).strip()
+        client.copy_remote_file(
+            f"/home/{USER}/recording.mp4",
+            f"/Users/sam/projects/synthetic-messenger-performance/saved_recordings/{hostname}.mp4",
+        )
+
+
 def stop_bots():
     """Stop zoom and clicking"""
     send("pm2 stop ad_clicker; killall zoom; killall node")
@@ -277,6 +291,9 @@ if __name__ == "__main__":
 
     if args["combine_record"]:
         combine_recordings()
+
+    if args["download"]:
+        download_recordings()
 
     if args["stop"]:
         stop_bots()
