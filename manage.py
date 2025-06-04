@@ -196,8 +196,12 @@ def record_bots():
     HEIGHT = 792
 
     # for mobile
+    # too big still!!!
     WIDTH = 792
     HEIGHT = 1406
+
+    WIDTH = 400
+    HEIGHT = 800
 
     print("killing vnc")
     send("vncserver -kill :1")
@@ -239,6 +243,7 @@ def combine_recordings():
 
 def download_recordings():
     hosts = get_ips()
+
     client = ParallelSSHClient(hosts, user=USER)
 
     filename = "/Users/sam/projects/synthetic-messenger-performance/saved_recordings/recording.mp4"
